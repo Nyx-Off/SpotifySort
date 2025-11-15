@@ -1,0 +1,21 @@
+# Spotify API
+spotipy>=2.23.0          # Spotify Web API wrapper
+requests>=2.31.0         # HTTP library
+
+# Web Framework
+Flask>=3.0.0             # Web framework
+Flask-CORS>=4.0.0        # Cross-origin resource sharing
+Flask-Session>=0.5.0     # Server-side sessions
+
+# CLI
+click>=8.1.0             # CLI framework
+colorama>=0.4.6          # Colored terminal output
+tabulate>=0.9.0          # Pretty table output
+
+# Configuration & Utils
+PyYAML>=6.0              # Configuration files
+python-dotenv>=1.0.0     # Environment variables
+tqdm>=4.66.0             # Progress bars
+
+# Data Processing
+pandas>=2.0.0            # Data analysis (optional but useful)

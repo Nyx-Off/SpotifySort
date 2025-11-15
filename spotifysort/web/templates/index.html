@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpotifySort - Organize Your Spotify Library</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-spotify">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fab fa-spotify"></i> SpotifySort
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if authenticated %}
+                    <li class="nav-item">
+                        <span class="nav-link">
+                            <i class="fas fa-user-circle"></i> {{ user.display_name }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-success text-white" href="/login">
+                            <i class="fab fa-spotify"></i> Login with Spotify
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        {% if not authenticated %}
+        <!-- Landing Page -->
+        <div class="text-center hero-section">
+            <i class="fab fa-spotify fa-5x text-success mb-4"></i>
+            <h1 class="display-4 mb-4">Organize Your Spotify Library</h1>
+            <p class="lead mb-4">
+                Automatically sort your Spotify library into organized playlists by genre, mood, decade, and more!
+            </p>
+
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-guitar fa-3x text-success mb-3"></i>
+                        <h4>Sort by Genre</h4>
+                        <p>Automatically create playlists for Rock, Pop, Jazz, and more</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-smile fa-3x text-success mb-3"></i>
+                        <h4>Sort by Mood</h4>
+                        <p>Happy, Sad, Energetic, Calm - let AI analyze your music</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-calendar fa-3x text-success mb-3"></i>
+                        <h4>Sort by Decade</h4>
+                        <p>Create playlists for 70s, 80s, 90s, and beyond</p>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/login" class="btn btn-success btn-lg mt-5">
+                <i class="fab fa-spotify"></i> Get Started - Login with Spotify
+            </a>
+        </div>
+
+        {% else %}
+        <!-- Dashboard -->
+        <div class="dashboard">
+            <h1 class="mb-4">
+                <i class="fas fa-home"></i> Dashboard
+            </h1>
+
+            <!-- Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-spotify text-white">
+                            <h5><i class="fas fa-chart-bar"></i> Library Statistics</h5>
+                        </div>
+                        <div class="card-body" id="statsContainer">
+                            <div class="text-center">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading your library statistics...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Cards -->
+            <div class="row">
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card action-card" onclick="showSortModal('genre')">
+                        <div class="card-body text-center">
+                            <i class="fas fa-guitar fa-3x text-success mb-3"></i>
+                            <h5>Sort by Genre</h5>
+                            <p class="text-muted">Create genre-based playlists</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card action-card" onclick="showSortModal('mood')">
+                        <div class="card-body text-center">
+                            <i class="fas fa-smile fa-3x text-success mb-3"></i>
+                            <h5>Sort by Mood</h5>
+                            <p class="text-muted">Analyze audio features</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card action-card" onclick="showSortModal('decade')">
+                        <div class="card-body text-center">
+                            <i class="fas fa-calendar fa-3x text-success mb-3"></i>
+                            <h5>Sort by Decade</h5>
+                            <p class="text-muted">Organize by era</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card action-card" onclick="showSortModal('artist')">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-music fa-3x text-success mb-3"></i>
+                            <h5>Sort by Artist</h5>
+                            <p class="text-muted">Artist collections</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Actions -->
+            <div class="row mt-4">
+                <div class="col-md-6 mb-4">
+                    <div class="card action-card h-100" onclick="showAdvancedSortModal()">
+                        <div class="card-body text-center">
+                            <i class="fas fa-filter fa-3x text-primary mb-3"></i>
+                            <h5>Advanced Sort</h5>
+                            <p class="text-muted">Select playlists and apply custom filters</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card action-card h-100" onclick="showPlaylistManager()">
+                        <div class="card-body text-center">
+                            <i class="fas fa-cog fa-3x text-warning mb-3"></i>
+                            <h5>Manage Playlists</h5>
+                            <p class="text-muted">Rename, delete, merge, and organize playlists</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-spotify text-white">
+                            <h5><i class="fas fa-list"></i> Your Playlists</h5>
+                        </div>
+                        <div class="card-body" id="playlistsContainer">
+                            <div class="text-center">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sort Modal -->
+    <div class="modal fade" id="sortModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-spotify text-white">
+                    <h5 class="modal-title" id="sortModalTitle">Sort Library</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sortForm">
+                        <input type="hidden" id="sortType">
+
+                        <div class="mb-3">
+                            <label class="form-label">Playlist Prefix</label>
+                            <input type="text" class="form-control" id="playlistPrefix" value="SpotifySort">
+                            <small class="text-muted">Playlists will be named: Prefix - Genre/Mood/etc</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="makePublic">
+                                <label class="form-check-label" for="makePublic">
+                                    Make playlists public
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="minTracksSection" style="display:none;">
+                            <label class="form-label">Minimum tracks per artist</label>
+                            <input type="number" class="form-control" id="minTracks" value="5" min="1">
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <span id="sortDescription"></span>
+                        </div>
+
+                        <div id="analysisResult" style="display:none;">
+                            <h6>Preview:</h6>
+                            <div id="analysisContent"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="analyzeBtn" onclick="analyzeLibrary()">
+                        <i class="fas fa-search"></i> Analyze
+                    </button>
+                    <button type="button" class="btn btn-success" id="createBtn" style="display:none;" onclick="createPlaylists()">
+                        <i class="fas fa-plus"></i> Create Playlists
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div class="modal fade" id="progressModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5">
+                    <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;"></div>
+                    <h5 id="progressText">Creating playlists...</h5>
+                    <p class="text-muted">This may take a few minutes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Sort Modal -->
+    <div class="modal fade" id="advancedSortModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-filter"></i> Advanced Sort</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="advancedSortForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Source</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="source" id="sourceLibrary" value="library" checked onchange="togglePlaylistSelection()">
+                                <label class="form-check-label" for="sourceLibrary">
+                                    My entire library
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="source" id="sourcePlaylists" value="playlists" onchange="togglePlaylistSelection()">
+                                <label class="form-check-label" for="sourcePlaylists">
+                                    Selected playlists
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="playlistSelectionSection" style="display:none;">
+                            <label class="form-label fw-bold">Select Playlists</label>
+                            <div id="playlistCheckboxes" class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                <div class="text-center">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    <p class="text-muted mt-2">Loading playlists...</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="discoverGenresBtn" onclick="discoverGenres()" style="display:none;">
+                                <i class="fas fa-tags"></i> Discover Genres from Selected Playlists
+                            </button>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Filters</label>
+
+                            <div class="mb-2">
+                                <label class="form-label">Genre</label>
+
+                                <div id="genreDiscoverySection" style="display:none;">
+                                    <div class="alert alert-success mb-2">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span id="genreDiscoveryText">Found genres in selected playlists</span>
+                                    </div>
+                                    <div id="genreCheckboxes" class="border rounded p-3 mb-2" style="max-height: 200px; overflow-y: auto;">
+                                        <!-- Genre checkboxes will be inserted here -->
+                                    </div>
+                                    <div class="mb-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="selectAllGenres()">Select All</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllGenres()">Deselect All</button>
+                                    </div>
+                                </div>
+
+                                <input type="text" class="form-control" id="filterGenres" placeholder="e.g., rock, pop, jazz (or use genre discovery above)">
+                                <small class="text-muted">Leave empty for all genres, or select from discovered genres above</small>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label">Mood</label>
+                                <select class="form-select" id="filterMood">
+                                    <option value="">All moods</option>
+                                    <option value="happy">Happy</option>
+                                    <option value="sad">Sad</option>
+                                    <option value="energetic">Energetic</option>
+                                    <option value="calm">Calm</option>
+                                    <option value="party">Party</option>
+                                </select>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">From Year</label>
+                                    <input type="number" class="form-control" id="filterYearFrom" placeholder="1970" min="1900" max="2030">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">To Year</label>
+                                    <input type="number" class="form-control" id="filterYearTo" placeholder="2025" min="1900" max="2030">
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label">Artist (comma-separated)</label>
+                                <input type="text" class="form-control" id="filterArtists" placeholder="e.g., The Beatles, Pink Floyd">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Output</label>
+                            <input type="text" class="form-control" id="advancedPlaylistName" placeholder="My Custom Playlist">
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" id="advancedMakePublic">
+                                <label class="form-check-label" for="advancedMakePublic">
+                                    Make playlist public
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="advancedPreview" style="display:none;">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <span id="advancedPreviewText"></span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="advancedAnalyzeBtn" onclick="analyzeAdvanced()">
+                        <i class="fas fa-search"></i> Preview
+                    </button>
+                    <button type="button" class="btn btn-success" id="advancedCreateBtn" style="display:none;" onclick="createAdvanced()">
+                        <i class="fas fa-plus"></i> Create Playlist
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playlist Manager Modal -->
+    <div class="modal fade" id="playlistManagerModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="fas fa-cog"></i> Playlist Manager</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="playlistSearch" placeholder="Search playlists..." onkeyup="filterPlaylists()">
+                    </div>
+
+                    <div id="playlistManagerContent">
+                        <div class="text-center">
+                            <div class="spinner-border text-warning" role="status"></div>
+                            <p class="text-muted mt-2">Loading playlists...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playlist Details Modal -->
+    <div class="modal fade" id="playlistDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-spotify text-white">
+                    <h5 class="modal-title" id="playlistDetailsTitle">Playlist Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="playlistDetailsContent">
+                    <!-- Content loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/advanced.js') }}"></script>
+</body>
+</html>

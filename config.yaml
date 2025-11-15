@@ -1,0 +1,47 @@
+# SpotifySort Configuration
+
+# Database settings
+database:
+  path: "music_library.db"
+
+# Music library paths
+library:
+  # Add your music directories here
+  paths:
+    - "~/Music"
+    # - "/path/to/another/music/folder"
+
+  # Supported audio formats
+  supported_formats:
+    - ".mp3"
+    - ".flac"
+    - ".ogg"
+    - ".m4a"
+    - ".wav"
+    - ".opus"
+    - ".wma"
+
+# Web server settings
+web:
+  host: "127.0.0.1"
+  port: 5000
+  debug: false
+
+# Scanner settings
+scanner:
+  # Skip hidden files and folders
+  skip_hidden: true
+
+  # Show progress bar during scan
+  show_progress: true
+
+  # Auto-update database on rescan
+  auto_update: true
+
+# Playlist settings
+playlists:
+  # Default export format (m3u or pls)
+  export_format: "m3u"
+
+  # Export path for playlists
+  export_path: "~/Music/Playlists"

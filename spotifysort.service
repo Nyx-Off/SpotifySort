@@ -1,0 +1,15 @@
+[Unit]
+Description=SpotifySort Web Application
+After=network.target
+
+[Service]
+Type=simple
+User=nyx
+WorkingDirectory=/home/nyx/SpotifySort
+Environment="PATH=/home/nyx/SpotifySort/venv/bin"
+ExecStart=/home/nyx/SpotifySort/venv/bin/python -m spotifysort.web.app --host 127.0.0.1 --port 5000
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
